@@ -1,0 +1,158 @@
+# ============================================================
+# QuickPanel360 — Production Docker Compose
+# QuickAgence
+#
+# PROFILES:
+#   all   → api + web + worker + postgres + redis + caddy  (VPS único)
+#   app   → api + web + worker + caddy                     (VPS1 en configuración 2-VPS)
+#   data  → postgres + redis                               (VPS2 en configuración 2-VPS)
+#
+# USO:
+#   VPS único:    docker compose -f docker-compose.prod.yml --profile all up -d
+#   VPS1 (app):   docker compose -f docker-compose.prod.yml --profile app up -d
+#   VPS2 (datos): docker compose -f docker-compose.prod.yml --profile data up -d
+#
+# VARIABLES:
+#   DATABASE_URL y REDIS_URL se leen de apps/api/.env.production
+#   Para 2 VPS, actualizar esas URLs para apuntar a la IP privada de VPS2.
+# ============================================================
+
+services:
+
+  # ── Base de datos ────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    profiles: [all, data]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cannaclub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-cannaclub_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cannaclub} -d ${POSTGRES_DB:-cannaclub_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Postgres no expone puertos al exterior en VPS único.
+    # En VPS2, descomenta y restringe con firewall:
+    # ports:
+    #   - "5432:5432"   # solo accesible desde VPS1 via red privada
+
+  # ── Redis ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    profiles: [all, data]
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory ${REDIS_MAX_MEMORY:-256mb}
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    # En VPS2, descomenta y restringe con firewall:
+    # ports:
+    #   - "6379:6379"   # solo accesible desde VPS1 via red privada
+
+  # ── API (NestJS) ─────────────────────────────────────────────
+  api:
+    build:
+      context: ./apps/api
+      args:
+        - APP_VERSION=${APP_VERSION:-1.0.0}
+        - GIT_SHA=${GIT_SHA:-unknown}
+        - BUILD_DATE=${BUILD_DATE:-unknown}
+    restart: unless-stopped
+    profiles: [all, app]
+    env_file:
+      - ./apps/api/.env.production
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false   # En perfil "app", postgres puede estar en otro VPS
+      redis:
+        condition: service_healthy
+        required: false   # Idem
+    volumes:
+      - api_storage:/app/storage
+
+  # ── Web (Next.js) ────────────────────────────────────────────
+  web:
+    build:
+      context: ./apps/web
+    restart: unless-stopped
+    profiles: [all, app]
+    env_file:
+      - ./apps/web/.env.production
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # ── Reverse proxy (Caddy) ────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: [all, app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3 / QUIC
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_storage:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge

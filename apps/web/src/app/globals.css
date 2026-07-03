@@ -1,0 +1,296 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #FAF8F2;
+  color: #15140F;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #FFE600;
+  color: #15140F;
+}
+
+@layer base {
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+  }
+  :root {
+    /* ── Fondos ──────────────────────────────────────────── */
+    --background: #FAF8F2;
+    --foreground: #15140F;
+    --card: #FFFFFF;
+    --card-foreground: #15140F;
+    --popover: #FFFFFF;
+    --popover-foreground: #15140F;
+
+    /* ── Primary (amarillo — siempre texto ink encima) ───── */
+    --primary: #FFE600;
+    --primary-foreground: #15140F;
+
+    /* ── Secondary / Muted ───────────────────────────────── */
+    --secondary: #F2EFE6;
+    --secondary-foreground: #15140F;
+    --muted: #F2EFE6;
+    --muted-foreground: #5C5A54;
+
+    /* ── Accent ──────────────────────────────────────────── */
+    --accent: #FFF9CC;
+    --accent-foreground: #15140F;
+
+    /* ── States ──────────────────────────────────────────── */
+    --destructive: #DC2626;
+
+    /* ── Bordes / Inputs ─────────────────────────────────── */
+    --border: #E0DDD4;
+    --input: #E0DDD4;
+    --ring: #FFE600;
+
+    /* ── Brand dinamico (configurable por tenant) ─────────── */
+    --brand-primary-rgb: 21 20 15;
+    --brand-hover-rgb: 40 38 30;
+    --brand-light-rgb: 225 222 210;
+    --brand-lighter-rgb: 250 248 242;
+
+    /* ── Charts ──────────────────────────────────────────── */
+    --chart-1: #15140F;
+    --chart-2: #FFE600;
+    --chart-3: #7A7770;
+    --chart-4: #DC2626;
+    --chart-5: #D97706;
+
+    /* ── Radius ──────────────────────────────────────────── */
+    --radius: 0.75rem;
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #15140F;
+    --sidebar-primary: #15140F;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F2EFE6;
+    --sidebar-accent-foreground: #15140F;
+    --sidebar-border: #E0DDD4;
+    --sidebar-ring: #FFE600;
+  }
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+  }
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ── Login animations ───────────────────────────────────────────────────────── */
+
+@keyframes login-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes login-scale-in {
+  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes login-logo-bounce {
+  0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  50% { transform: scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes login-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes login-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 230, 0, 0.16); }
+  50% { box-shadow: 0 0 50px rgba(255, 230, 0, 0.28); }
+}
+
+@keyframes login-orb-drift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(30px, -20px); }
+  66% { transform: translate(-15px, 15px); }
+  100% { transform: translate(0, 0); }
+}
+
+.login-logo { animation: login-logo-bounce 0.6s ease-out both; }
+.login-title { animation: login-fade-up 0.5s ease-out 0.15s both; }
+.login-subtitle { animation: login-fade-up 0.5s ease-out 0.25s both; }
+.login-card { animation: login-scale-in 0.5s ease-out 0.3s both; }
+.login-footer { animation: login-fade-up 0.5s ease-out 0.5s both; }
+.login-float { animation: login-float 6s ease-in-out infinite; }
+.login-glow { animation: login-glow 4s ease-in-out infinite; }
+.login-orb-1 { animation: login-orb-drift 15s ease-in-out infinite; }
+.login-orb-2 { animation: login-orb-drift 20s ease-in-out infinite reverse; }
+
+/* ── Landing scroll animations ──────────────────────────────────────────────── */
+
+@keyframes landing-slide-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes landing-slide-left {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes landing-scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes landing-counter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-title {
+  animation: landing-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+.animate-hero-subtitle {
+  animation: landing-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+.animate-hero-cta {
+  animation: landing-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+.animate-hero-illustration {
+  animation: landing-slide-left 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.animate-on-scroll.is-visible {
+  animation: landing-slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-on-scroll.is-visible .stagger-1 { animation: landing-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
+.animate-on-scroll.is-visible .stagger-2 { animation: landing-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+.animate-on-scroll.is-visible .stagger-3 { animation: landing-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; opacity: 0; }
+.animate-on-scroll.is-visible .stagger-4 { animation: landing-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; opacity: 0; }
+
+@keyframes showcase-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.showcase-content { animation: showcase-fade-in 0.35s ease-out; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float-delayed { animation: float-delayed 5s ease-in-out 1s infinite; }
+
+@keyframes nav-indicator {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.animate-nav-indicator { animation: nav-indicator 0.25s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll { opacity: 1; transform: none; }
+  .animate-on-scroll.is-visible { animation: none; }
+  .animate-on-scroll.is-visible .stagger-1,
+  .animate-on-scroll.is-visible .stagger-2,
+  .animate-on-scroll.is-visible .stagger-3,
+  .animate-on-scroll.is-visible .stagger-4 { animation: none; opacity: 1; }
+  .showcase-content { animation: none; }
+  .animate-hero-title,
+  .animate-hero-subtitle,
+  .animate-hero-cta,
+  .animate-hero-illustration { animation: none; }
+  .animate-float,
+  .animate-float-delayed { animation: none; }
+  .animate-nav-indicator { animation: none; }
+}
+
+/* Densidad visual compacta */
+.density-compact .p-3 { padding: 0.5rem !important; }
+.density-compact .p-4 { padding: 0.625rem !important; }
+.density-compact .p-5 { padding: 0.75rem !important; }
+.density-compact .gap-3 { gap: 0.5rem !important; }
+.density-compact .gap-4 { gap: 0.625rem !important; }
+.density-compact .gap-5 { gap: 0.75rem !important; }
+.density-compact .space-y-3 > * + * { margin-top: 0.5rem !important; }
+.density-compact .space-y-4 > * + * { margin-top: 0.625rem !important; }
+.density-compact .space-y-5 > * + * { margin-top: 0.75rem !important; }
+.density-compact .mt-3 { margin-top: 0.5rem !important; }
+.density-compact .mt-4 { margin-top: 0.625rem !important; }
+.density-compact .mt-5 { margin-top: 0.75rem !important; }
+.density-compact .h-11 { height: 2.25rem !important; }
+.density-compact .text-base { font-size: 0.875rem !important; }
+.density-compact .text-xl { font-size: 1rem !important; }

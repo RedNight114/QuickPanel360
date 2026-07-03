@@ -1,0 +1,53 @@
+{
+  "name": "quickpanel360-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "test:smoke": "playwright test"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@tanstack/react-query": "^5.100.14",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/qrcode": "^1.5.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.3.0",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.40.0",
+    "next": "^15.0.4",
+    "phaser": "^4.2.0",
+    "qrcode": "^1.5.4",
+    "radix-ui": "^1.4.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.76.1",
+    "recharts": "^3.8.1",
+    "shadcn": "^4.8.0",
+    "socket.io-client": "^4.8.3",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.4.3",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "^15.0.4",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "postcss": "^8.5.15"
+  }
+}

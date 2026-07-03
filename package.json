@@ -1,0 +1,17 @@
+{
+  "name": "quickpanel360",
+  "version": "0.1.0",
+  "description": "QuickPanel360 — SaaS multitenant para clubs. by QuickAgence.",
+  "private": true,
+  "scripts": {
+    "release:check": "npm run --prefix apps/api lint && npx --prefix apps/api tsc --noEmit -p apps/api/tsconfig.json && npx --prefix apps/web tsc --noEmit -p apps/web/tsconfig.json && npm run --prefix apps/api build",
+    "release:version": "node scripts/release/bump-version.js",
+    "release:tag": "bash scripts/release/tag-release.sh",
+    "release:notes": "bash scripts/release/release-notes.sh",
+    "prisma:generate": "npm run --prefix apps/api prisma:generate",
+    "prisma:migrate:deploy": "npm run --prefix apps/api prisma:migrate:deploy"
+  },
+  "keywords": [],
+  "author": "QuickAgence",
+  "license": "UNLICENSED"
+}

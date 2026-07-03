@@ -1,0 +1,90 @@
+# ============================================================
+# QuickPanel360 — .gitignore
+# QuickAgence
+# ============================================================
+
+# ── Dependencies ─────────────────────────────────────────────
+**/node_modules/
+**/.pnp
+**/.pnp.js
+
+# ── Build output ─────────────────────────────────────────────
+**/dist/
+**/build/
+**/.next/
+**/out/
+**/coverage/
+**/.nyc_output/
+**/*.tsbuildinfo
+
+# ── Environment variables — NUNCA en el repo ─────────────────
+.env
+.env.*
+.env.local
+.env.*.local
+apps/**/.env
+apps/**/.env.local
+apps/**/.env.development
+apps/**/.env.staging
+apps/**/.env.production
+# Permitir los ejemplos (sin secretos reales)
+!apps/**/.env.example
+!apps/**/.env.*.example
+!.env.example
+
+# ── Backups — solo locales, nunca en el repo ─────────────────
+backups/
+*.dump
+*.sql.gz
+
+# ── Storage / uploads locales ────────────────────────────────
+apps/api/storage/
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+*.err.log
+.*.log
+.*.err.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── OS / editores ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# VSCode — permitir config de equipo, ignorar personal
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ── Temp / cache ─────────────────────────────────────────────
+.tmp/
+.temp/
+.cache/
+*.tmp
+
+# ── Prisma — cliente generado (se regenera con prisma generate)
+apps/api/node_modules/.prisma/
+apps/api/generated/
+
+# ── Next.js ──────────────────────────────────────────────────
+apps/web/.next/
+apps/web/out/
+
+# ── Docker ───────────────────────────────────────────────────
+# Incluir docker-compose.yml y docker-compose.prod.yml (sin secretos)
+# Excluir overrides locales con secretos:
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ── Claude Code (interno) ────────────────────────────────────
+.claude/
+.agents/

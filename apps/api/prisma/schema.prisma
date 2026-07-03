@@ -1,0 +1,2313 @@
+// ======================================================
+// Prisma Schema — TPV Multiempresa para Clubes
+// MVP v0.1
+// ======================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// ENUMS GENERALES
+// ======================================================
+
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DISABLED
+  ARCHIVED
+}
+
+enum TenantAccessStatus {
+  ENABLED
+  DISABLED
+  EMERGENCY_LOCKED
+  MAINTENANCE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum TenantUserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum UserRole {
+  SUPERADMIN
+  OWNER
+  MANAGER
+  EMPLOYEE
+}
+
+enum MemberStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  BANNED
+  INACTIVE
+  DELETED
+}
+
+enum MemberClass {
+  STANDARD
+  PREFERRED
+  VIP
+}
+
+enum MemberNoteVisibility {
+  OWNER_ONLY
+  MANAGER_AND_OWNER
+  ALL_STAFF
+}
+
+enum IncidentType {
+  WARNING
+  PAYMENT_ISSUE
+  BEHAVIOR
+  DOCUMENT_ISSUE
+  BAN
+  OTHER
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+enum UnitType {
+  KG
+  GRAM
+  UNIT
+  ML
+  PACK
+}
+
+enum SaleItemPricingMode {
+  BY_UNIT
+  BY_WEIGHT
+  BY_AMOUNT
+}
+
+enum InventoryMovementType {
+  STOCK_IN
+  SALE
+  ADJUSTMENT
+  WASTE
+  LOSS
+  DAMAGED
+  SAMPLE
+  RETURN
+  CORRECTION
+}
+
+enum ScaleToleranceAction {
+  BLOCK
+  REQUIRE_MANAGER_CONFIRMATION
+  ALLOW_WITH_WARNING
+}
+
+enum PosSessionStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELLED
+  REFUNDED
+  PENDING
+}
+
+enum SaleType {
+  STANDARD
+  CREDIT
+  PARTIAL_CREDIT
+  SPECIAL
+}
+
+enum SettlementStatus {
+  PAID
+  PARTIALLY_PAID
+  PENDING
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BIZUM
+  TRANSFER
+  MIXED
+}
+
+enum PaymentStatus {
+  COMPLETED
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+enum CashMovementType {
+  CASH_IN
+  CASH_OUT
+  CORRECTION
+  EXPENSE
+  SALE_CASH_IN
+  RECEIVABLE_CASH_IN
+  THIRD_PARTY_CASH_OUT
+  WITHDRAWAL
+  CORRECTION_IN
+  CORRECTION_OUT
+}
+
+enum ReceivableStatus {
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum ThirdPartyType {
+  SUPPLIER
+  SERVICE_PROVIDER
+  COLLABORATOR
+  OTHER
+}
+
+enum ThirdPartyStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ThirdPartyPaymentCategory {
+  SUPPLIER_PAYMENT
+  SERVICE_PAYMENT
+  COLLABORATOR_PAYMENT
+  CASH_WITHDRAWAL
+  EXPENSE
+  OTHER
+}
+
+enum ThirdPartyPaymentStatus {
+  PAID
+  CANCELLED
+}
+
+enum AccessLinkStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum EmergencyLockStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum PlatformPlanStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TenantSubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  PAST_DUE
+}
+
+enum PlatformSupportSessionStatus {
+  OPEN
+  CLOSED
+}
+
+enum PlatformInvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
+}
+
+enum PlatformPaymentStatus {
+  PAID
+  REFUNDED
+}
+
+enum PlatformModuleStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum TenantModuleStatus {
+  ENABLED
+  DISABLED
+}
+
+enum TenantLifecycleStage {
+  LEAD
+  NEW_SIGNUP
+  ONBOARDING
+  ACTIVE_STABLE
+  ACTIVE_AT_RISK
+  SUSPENDED
+  CHURNED
+}
+
+enum TenantRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PlatformAccountHealth {
+  STABLE
+  FOLLOW_UP
+  AT_RISK
+  BLOCKED
+}
+
+enum PlatformCollectionStatus {
+  OPEN
+  CONTACTED
+  PROMISE
+  DISPUTED
+  CLOSED
+}
+
+enum PlatformAccountActivityType {
+  NOTE
+  CONTACT
+  COLLECTION
+  PAYMENT
+  PROMISE
+  STATUS_CHANGE
+  RENEWAL
+}
+
+enum OnboardingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+}
+
+enum NotificationType {
+  INVENTORY_LOW
+  INVENTORY_OUT
+  SCALE_TOLERANCE_EXCEEDED
+  POSITIVE_WASTE_HIGH
+  NEGATIVE_DIFFERENCE
+  CASH_DIFFERENCE
+  CASH_OPEN_TOO_LONG
+  MEMBER_BIRTHDAY
+  MEMBER_PENDING_CONTRIBUTION
+  SECURITY_ALERT
+  EMERGENCY_ACTIVE
+  SYSTEM
+  TRIAL_EXPIRING
+  INVOICE_OVERDUE
+  SUSPENSION_WARNING
+  PLAN_LIMIT_WARNING
+}
+
+enum NotificationPriority {
+  INFO
+  WARNING
+  IMPORTANT
+  CRITICAL
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  IN_REVIEW
+  RESOLVED
+  ARCHIVED
+}
+
+enum ChatConversationType {
+  DIRECT
+  GROUP
+  SUPPORT
+}
+
+enum ChatMessageType {
+  TEXT
+  SYSTEM
+}
+
+enum ChatParticipantRole {
+  OWNER
+  MEMBER
+}
+
+// ======================================================
+// SISTEMA MULTIEMPRESA
+// ======================================================
+
+model Tenant {
+  id         String  @id @default(uuid())
+  name       String
+  legalName  String?
+  taxId      String?
+  email      String?
+  phone      String?
+  address    String?
+  city       String?
+  postalCode String?
+  country    String  @default("ES")
+
+  status                TenantStatus         @default(ACTIVE)
+  accessStatus          TenantAccessStatus   @default(ENABLED)
+  lifecycleStage        TenantLifecycleStage @default(NEW_SIGNUP)
+  riskLevel             TenantRiskLevel       @default(LOW)
+  accountHealth         PlatformAccountHealth @default(STABLE)
+  platformNotes         String?
+  lastContactAt         DateTime?
+  nextReviewAt          DateTime?
+  onboardingStartedAt   DateTime?
+  onboardingCompletedAt DateTime?
+  activatedAt           DateTime?
+  accountOwnerId        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                   TenantUser[]
+  members                 Member[]
+  memberClassBenefits     MemberClassBenefit[]
+  categories              ProductCategory[]
+  products                Product[]
+  inventory               Inventory[]
+  movements               InventoryMovement[]
+  posSessions             PosSession[]
+  sales                   Sale[]
+  payments                Payment[]
+  cashMovements           CashMovement[]
+  receivables             Receivable[]
+  receivablePayments      ReceivablePayment[]
+  thirdParties            ThirdParty[]
+  thirdPartyPayments      ThirdPartyPayment[]
+  accessLinks             AccessLink[]
+  emergencyLocks          EmergencyLock[]
+  auditLogs               AuditLog[]
+  platformAuditLogs       PlatformAuditLog[]
+  subscription            TenantSubscription?
+  modules                 TenantModule[]
+  supportSessions         PlatformSupportSession[]
+  platformInvoices        PlatformInvoice[]
+  platformPayments        PlatformPayment[]
+  convertedFromLead       CommercialLead?
+  contacts                TenantContact[]
+  onboardingTasks         TenantOnboardingTask[]
+  settings                TenantSettings?
+  chatConversations       ChatConversation[]
+  chatParticipants        ChatParticipant[]
+  chatMessages            ChatMessage[]
+  chatDeviceKeys          ChatDeviceKey[]
+  notifications           InternalNotification[]
+  notificationPreferences UserNotificationPreference[] @relation("TenantNotifPrefs")
+  accountOwner            User?                        @relation("TenantAccountOwner", fields: [accountOwnerId], references: [id], onDelete: SetNull)
+  collectionCase          TenantCollectionCase?
+  accountActivities       TenantAccountActivity[]
+  memberSessions          MemberSession[]           @relation("TenantMemberSessions")
+  memberPointBalances     MemberPointBalance[]      @relation("TenantMemberPoints")
+  memberPointTransactions MemberPointTransaction[]  @relation("TenantMemberPointTx")
+  memberAppSettings       MemberAppSettings?        @relation("TenantMemberAppSettings")
+  rewardGames             RewardGame[]              @relation("TenantRewardGames")
+  rewardGamePlays         RewardGamePlay[]          @relation("TenantGamePlays")
+  missions                Mission[]                 @relation("TenantMissions")
+  missionProgress         MemberMissionProgress[]   @relation("TenantMissionProgress")
+  rewards                 Reward[]                  @relation("TenantRewards")
+  rewardRedemptions       RewardRedemption[]        @relation("TenantRedemptions")
+  rewardGameSessions      RewardGameSession[]       @relation("TenantGameSessions")
+  memberPushSubscriptions MemberPushSubscription[]  @relation("TenantMemberPush")
+  adminPushSubscriptions  AdminPushSubscription[]   @relation("TenantAdminPush")
+
+  @@index([status])
+  @@index([accessStatus])
+  @@index([lifecycleStage])
+  @@index([riskLevel])
+  @@index([accountHealth])
+  @@index([accountOwnerId])
+  @@map("tenants")
+}
+
+model TenantSettings {
+  id       String @id @default(uuid())
+  tenantId String @unique
+
+  displayName  String?
+  logoUrl      String?
+  primaryColor String?
+  accentColor  String?
+
+  currency String @default("EUR")
+  locale   String @default("es-ES")
+  timezone String @default("Atlantic/Canary")
+
+  allowCreditSales             Boolean              @default(true)
+  requireCreditReason          Boolean              @default(true)
+  allowSpecialSales            Boolean              @default(false)
+  requireCashCloseConfirmation Boolean              @default(true)
+  autoGenerateMemberNumber     Boolean              @default(false)
+  memberNumberPrefix           String?
+  minimumMemberAge             Int?
+  showSecurityBadges           Boolean              @default(true)
+  requireAccessLink            Boolean              @default(true)
+  allowCashDiscrepancyClose    Boolean              @default(true)
+  requireCashDiscrepancyReason Boolean              @default(false)
+  scaleVerificationEnabled     Boolean              @default(true)
+  requireScaleVerification     Boolean              @default(true)
+  maxWastePerLineGrams         Decimal              @default(0.05) @db.Decimal(10, 3)
+  maxWastePercent              Decimal              @default(5) @db.Decimal(6, 2)
+  scaleToleranceAction         ScaleToleranceAction @default(BLOCK)
+  allowUnderWeight             Boolean              @default(false)
+  scalePrecisionGrams          Decimal              @default(0.01) @db.Decimal(10, 3)
+  autoRegisterScaleWaste       Boolean              @default(true)
+  scaleWasteReason             String               @default("Diferencia por peso real en báscula")
+  showScaleStepOnMobile        Boolean              @default(true)
+  requireMemberPhoto           Boolean              @default(false)
+
+  // ── Inventario ──────────────────────────────────────────────────────────────
+  blockDispensationIfNoStock Boolean @default(false)
+  lowStockAlertEnabled       Boolean @default(true)
+  lowStockThresholdGrams     Decimal @default(50) @db.Decimal(10, 3)
+  requireAdjustmentReason    Boolean @default(false)
+  requireWasteReason         Boolean @default(false)
+  showNegativeScaleDiff      Boolean @default(true)
+  inventoryDisplayUnit       String  @default("g")
+
+  // ── Caja ────────────────────────────────────────────────────────────────────
+  recommendedOpeningCash      Decimal? @db.Decimal(10, 2)
+  alertOpenCashSessionMinutes Int?
+
+  // ── Apariencia ──────────────────────────────────────────────────────────────
+  defaultDensity String @default("comfortable")
+
+  // ── Punto de dispensación ───────────────────────────────────────────────────
+  quickWeightValuesGrams String  @default("1,2,3,5")
+  showReceiptAfterSale   Boolean @default(true)
+
+  // ── Notificaciones del club ──────────────────────────────────────────────────
+  notifyLowStock        Boolean @default(true)
+  notifyCashDiscrepancy Boolean @default(true)
+  notifyHighWaste       Boolean @default(false)
+  notifyMemberBirthday  Boolean @default(true)
+  notifyHighReceivables Boolean @default(false)
+  notifyEmergency       Boolean @default(true)
+  notifySupportActivity Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  memberClassConfig MemberClassConfig[]
+
+  @@map("tenant_settings")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  phone        String?
+  avatarUrl    String?
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  totpSecret   String?
+  totpEnabled  Boolean    @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenants TenantUser[]
+
+  createdMembers Member[] @relation("MemberCreatedBy")
+  updatedMembers Member[] @relation("MemberUpdatedBy")
+
+  createdProducts Product[] @relation("ProductCreatedBy")
+
+  openedPosSessions PosSession[] @relation("PosSessionOpenedBy")
+  closedPosSessions PosSession[] @relation("PosSessionClosedBy")
+
+  salesSold              Sale[]     @relation("SaleSoldBy")
+  salesCancelled         Sale[]     @relation("SaleCancelledBy")
+  salesApproved          Sale[]     @relation("SaleApprovedBy")
+  scaleVerifiedSaleItems SaleItem[] @relation("SaleItemScaleVerifiedBy")
+  scaleOverrideSaleItems SaleItem[] @relation("SaleItemScaleOverrideBy")
+
+  inventoryMovements InventoryMovement[] @relation("InventoryMovementCreatedBy")
+
+  cashMovements               CashMovement[]      @relation("CashMovementCreatedBy")
+  receivablesCreated          Receivable[]        @relation("ReceivableCreatedBy")
+  receivablesApproved         Receivable[]        @relation("ReceivableApprovedBy")
+  receivablePaymentsReceived  ReceivablePayment[] @relation("ReceivablePaymentReceivedBy")
+  thirdPartiesCreated         ThirdParty[]        @relation("ThirdPartyCreatedBy")
+  thirdPartyPaymentsPaid      ThirdPartyPayment[] @relation("ThirdPartyPaymentPaidBy")
+  thirdPartyPaymentsCancelled ThirdPartyPayment[] @relation("ThirdPartyPaymentCancelledBy")
+
+  activatedEmergencyLocks   EmergencyLock[] @relation("EmergencyActivatedBy")
+  deactivatedEmergencyLocks EmergencyLock[] @relation("EmergencyDeactivatedBy")
+
+  auditLogs                AuditLog[]
+  platformAuditLogs        PlatformAuditLog[]           @relation("PlatformAuditActor")
+  openedSupportSessions    PlatformSupportSession[]     @relation("PlatformSupportOpenedBy")
+  closedSupportSessions    PlatformSupportSession[]     @relation("PlatformSupportClosedBy")
+  chatConversationsCreated  ChatConversation[]           @relation("ChatConversationCreatedBy")
+  chatSupportAssignments    ChatConversation[]           @relation("ChatSupportAssignedTo")
+  chatParticipants         ChatParticipant[]            @relation("ChatParticipantUser")
+  chatMessagesSent         ChatMessage[]                @relation("ChatMessageSender")
+  chatDeviceKeys           ChatDeviceKey[]              @relation("ChatDeviceKeyUser")
+  chatReactions            ChatMessageReaction[]        @relation("ChatReactionUser")
+  chatMentions             ChatMessageMention[]         @relation("ChatMentionUser")
+  leadsAssigned            CommercialLead[]             @relation("LeadAssignedTo")
+  leadsReviewed            CommercialLead[]             @relation("LeadReviewedBy")
+  notifications             InternalNotification[]       @relation("NotificationUser")
+  notificationPreferences   UserNotificationPreference[] @relation("UserNotifPrefs")
+  sessions                  UserSession[]                @relation("UserSessionUser")
+  adminPushSubscriptions    AdminPushSubscription[]      @relation("AdminPushSubs")
+  ownedTenantAccounts       Tenant[]                     @relation("TenantAccountOwner")
+  assignedCollectionCases   TenantCollectionCase[]       @relation("CollectionAssignedTo")
+  accountActivitiesAuthored TenantAccountActivity[]      @relation("PlatformAccountActivityActor")
+
+  @@index([status])
+  @@map("users")
+}
+
+model TenantUser {
+  id       String @id @default(uuid())
+  tenantId String
+  userId   String
+
+  role   UserRole
+  status TenantUserStatus @default(ACTIVE)
+
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  overrides UserPermissionOverride[]
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([role])
+  @@map("tenant_users")
+}
+
+model ChatConversation {
+  id            String               @id @default(uuid())
+  tenantId      String
+  type          ChatConversationType @default(DIRECT)
+  title         String?
+  createdById   String?
+  assignedToId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo User?  @relation("ChatSupportAssignedTo", fields: [assignedToId], references: [id])
+  createdBy User?  @relation("ChatConversationCreatedBy", fields: [createdById], references: [id])
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+
+  @@index([tenantId])
+  @@index([type])
+  @@index([updatedAt])
+  @@index([tenantId, updatedAt(sort: Desc)])
+  @@map("chat_conversations")
+}
+
+model ChatParticipant {
+  id             String              @id @default(uuid())
+  tenantId       String
+  conversationId String
+  userId         String
+  role           ChatParticipantRole @default(MEMBER)
+  lastReadAt     DateTime?
+  muted          Boolean             @default(false)
+  archived       Boolean             @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User             @relation("ChatParticipantUser", fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([conversationId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id                     String          @id @default(uuid())
+  tenantId               String
+  conversationId         String
+  senderId               String?
+  type                   ChatMessageType @default(TEXT)
+  body                   String
+  clientEncryptedPayload Json?
+  deletedAt              DateTime?
+  editedAt               DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replyToId  String?
+  pinnedAt   DateTime?
+  pinnedById String?
+
+  tenant       Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation ChatConversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User?                 @relation("ChatMessageSender", fields: [senderId], references: [id])
+  replyTo      ChatMessage?          @relation("ChatMessageReply", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies      ChatMessage[]         @relation("ChatMessageReply")
+  reactions    ChatMessageReaction[]
+  mentions     ChatMessageMention[]
+
+  @@index([tenantId])
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([replyToId])
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@map("chat_messages")
+}
+
+model ChatMessageReaction {
+  id        String   @id @default(uuid())
+  tenantId  String
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation("ChatReactionUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@index([tenantId])
+  @@map("chat_message_reactions")
+}
+
+model ChatMessageMention {
+  id        String   @id @default(uuid())
+  tenantId  String
+  messageId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation("ChatMentionUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@index([tenantId])
+  @@map("chat_message_mentions")
+}
+
+model ChatDeviceKey {
+  id         String    @id @default(uuid())
+  tenantId   String
+  userId     String
+  deviceId   String
+  deviceName String?
+  userAgent  String?
+  publicKey  String
+  algorithm  String    @default("ECDH-P256")
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation("ChatDeviceKeyUser", fields: [userId], references: [id])
+
+  @@unique([tenantId, userId, deviceId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([active])
+  @@map("chat_device_keys")
+}
+
+model PlatformPlan {
+  id           String             @id @default(uuid())
+  code         String             @unique
+  name         String
+  description  String?
+  priceMonthly Decimal            @default(0) @db.Decimal(10, 2)
+  priceAnnual  Decimal?           @db.Decimal(10, 2)
+  currency     String             @default("EUR")
+  maxUsers     Int?
+  maxProducts  Int?
+  features     Json?
+  status       PlatformPlanStatus @default(ACTIVE)
+
+  // Marketing fields
+  publicVisible        Boolean   @default(true)
+  marketingTitle       String?
+  marketingDescription String?
+  isRecommended        Boolean   @default(false)
+  sortOrder            Int       @default(0)
+  ctaLabel             String?
+  offerLabel           String?
+  offerEndsAt          DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions   TenantSubscription[]
+  modules         PlatformPlanModule[]
+  commercialLeads CommercialLead[]
+
+  @@index([status])
+  @@index([publicVisible])
+  @@map("platform_plans")
+}
+
+enum CommercialLeadStatus {
+  NEW
+  IN_REVIEW
+  WAITING_PAYMENT
+  APPROVED
+  REJECTED
+  ACCESS_SENT
+  ARCHIVED
+}
+
+enum CommercialLeadPaymentStatus {
+  NOT_REQUIRED
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model CommercialLead {
+  id                String  @id @default(uuid())
+  name              String
+  email             String
+  phone             String?
+  companyName       String
+  country           String  @default("ES")
+  preferredLanguage String  @default("es")
+  requestedPlanId   String?
+  estimatedUsers    Int?
+  message           String?
+  consentGiven      Boolean @default(false)
+  source            String  @default("landing")
+
+  status        CommercialLeadStatus        @default(NEW)
+  paymentStatus CommercialLeadPaymentStatus @default(NOT_REQUIRED)
+
+  assignedToId      String?
+  reviewedById      String?
+  convertedTenantId String?   @unique
+  reviewedAt        DateTime?
+  acceptedAt        DateTime?
+  rejectedAt        DateTime?
+  convertedAt       DateTime?
+  internalNotes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requestedPlan   PlatformPlan? @relation(fields: [requestedPlanId], references: [id], onDelete: SetNull)
+  assignedTo      User?         @relation("LeadAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  reviewedBy      User?         @relation("LeadReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  convertedTenant Tenant?       @relation(fields: [convertedTenantId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@map("commercial_leads")
+}
+
+model TenantSubscription {
+  id       String  @id @default(uuid())
+  tenantId String  @unique
+  planId   String?
+
+  status        TenantSubscriptionStatus @default(ACTIVE)
+  startsAt      DateTime                 @default(now())
+  nextRenewalAt DateTime?
+  endsAt        DateTime?
+  trialEndsAt   DateTime?
+  suspendedAt   DateTime?
+  cancelledAt   DateTime?
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan   PlatformPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([planId])
+  @@index([status])
+  @@map("tenant_subscriptions")
+}
+
+model PlatformModuleDefinition {
+  id          String               @id @default(uuid())
+  key         String               @unique
+  name        String
+  description String?
+  category    String               @default("Operativa")
+  sortOrder   Int                  @default(0)
+  status      PlatformModuleStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenants TenantModule[]
+  plans   PlatformPlanModule[]
+
+  @@index([status])
+  @@index([category])
+  @@map("platform_module_definitions")
+}
+
+model PlatformPlanModule {
+  id       String @id @default(uuid())
+  planId   String
+  moduleId String
+
+  createdAt DateTime @default(now())
+
+  plan   PlatformPlan             @relation(fields: [planId], references: [id], onDelete: Cascade)
+  module PlatformModuleDefinition @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, moduleId])
+  @@index([planId])
+  @@index([moduleId])
+  @@map("platform_plan_modules")
+}
+
+model TenantModule {
+  id       String @id @default(uuid())
+  tenantId String
+  moduleId String
+
+  status     TenantModuleStatus @default(ENABLED)
+  enabledAt  DateTime?
+  disabledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  module PlatformModuleDefinition @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, moduleId])
+  @@index([tenantId])
+  @@index([moduleId])
+  @@index([status])
+  @@map("tenant_modules")
+}
+
+model TenantContact {
+  id        String  @id @default(uuid())
+  tenantId  String
+  name      String
+  role      String?
+  email     String?
+  phone     String?
+  isPrimary Boolean @default(false)
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([isPrimary])
+  @@map("tenant_contacts")
+}
+
+model TenantOnboardingTask {
+  id          String               @id @default(uuid())
+  tenantId    String
+  title       String
+  description String?
+  status      OnboardingTaskStatus @default(PENDING)
+  owner       String?
+  dueAt       DateTime?
+  completedAt DateTime?
+  sortOrder   Int                  @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([tenantId, sortOrder])
+  @@map("tenant_onboarding_tasks")
+}
+
+// ======================================================
+// PERMISOS
+// ======================================================
+
+model TenantCollectionCase {
+  id            String                   @id @default(uuid())
+  tenantId      String                   @unique
+  assignedToId  String?
+  status        PlatformCollectionStatus @default(OPEN)
+  notes         String?
+  openedAt      DateTime                 @default(now())
+  lastContactAt DateTime?
+  nextActionAt  DateTime?
+  promiseDate   DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo User?  @relation("CollectionAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([nextActionAt])
+  @@map("tenant_collection_cases")
+}
+
+model TenantAccountActivity {
+  id          String                      @id @default(uuid())
+  tenantId    String
+  actorUserId String?
+  type        PlatformAccountActivityType @default(NOTE)
+  title       String
+  notes       String?
+  metadata    Json?
+  createdAt   DateTime                    @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actor  User?  @relation("PlatformAccountActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([actorUserId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("tenant_account_activities")
+}
+
+model Permission {
+  id          String  @id @default(uuid())
+  key         String  @unique
+  description String?
+  module      String
+
+  createdAt DateTime @default(now())
+
+  rolePermissions RolePermission[]
+  userOverrides   UserPermissionOverride[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  role         UserRole
+  permissionId String
+
+  createdAt DateTime @default(now())
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@index([role])
+  @@map("role_permissions")
+}
+
+model UserPermissionOverride {
+  id           String  @id @default(uuid())
+  tenantUserId String
+  permissionId String
+  allowed      Boolean
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  tenantUser TenantUser @relation(fields: [tenantUserId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantUserId, permissionId])
+  @@index([tenantUserId])
+  @@map("user_permission_overrides")
+}
+
+// ======================================================
+// SOCIOS
+// ======================================================
+
+model Member {
+  id       String @id @default(uuid())
+  tenantId String
+
+  memberNumber String
+  firstName    String?
+  lastName     String?
+  displayName  String?
+
+  documentType   String?
+  documentNumber String?
+
+  birthDate       DateTime?
+  phone           String?
+  email           String?
+  address         String?
+  city            String?
+  postalCode      String?
+  profileNotes    String?
+  internalNotes   String?
+  photoUrl        String?
+  photoStorageKey String?
+
+  status                 MemberStatus @default(PENDING)
+  memberClass            MemberClass  @default(STANDARD)
+  preferredContactMethod String?
+  marketingConsent       Boolean      @default(false)
+  joinedAt               DateTime     @default(now())
+  lastVisitAt            DateTime?
+
+  createdById String?
+  updatedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdBy User? @relation("MemberCreatedBy", fields: [createdById], references: [id])
+  updatedBy User? @relation("MemberUpdatedBy", fields: [updatedById], references: [id])
+
+  notes              MemberNote[]
+  incidents          MemberIncident[]
+  sales              Sale[]
+  receivables        Receivable[]
+  receivablePayments ReceivablePayment[]
+  memberSessions     MemberSession[]           @relation("MemberSessions")
+  pointBalances      MemberPointBalance[]      @relation("MemberPointBalance")
+  pointTransactions  MemberPointTransaction[]  @relation("MemberPointTransactions")
+  gamePlays          RewardGamePlay[]          @relation("MemberGamePlays")
+  missionProgress    MemberMissionProgress[]   @relation("MemberMissionProgress")
+  rewardRedemptions  RewardRedemption[]        @relation("MemberRedemptions")
+  gameSessions       RewardGameSession[]       @relation("MemberGameSessions")
+  pushSubscriptions  MemberPushSubscription[]  @relation("MemberPushSubs")
+
+  @@unique([tenantId, memberNumber])
+  @@unique([tenantId, documentNumber])
+  @@index([tenantId])
+  @@index([status])
+  @@index([memberClass])
+  @@index([firstName, lastName])
+  @@map("members")
+}
+
+model MemberClassConfig {
+  id       String @id @default(uuid())
+  tenantId String
+
+  memberClass           MemberClass @default(STANDARD)
+  label                 String
+  description           String?
+  suggestedBonification Decimal     @default(0) @db.Decimal(10, 2)
+  birthdayBonification  Decimal     @default(0) @db.Decimal(10, 2)
+  requirePhoto          Boolean     @default(false)
+  isDefault             Boolean     @default(false)
+  isActive              Boolean     @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantSettings TenantSettings @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  @@unique([tenantId, memberClass])
+  @@index([tenantId])
+  @@map("member_class_config")
+}
+
+model MemberClassBenefit {
+  id          String      @id @default(uuid())
+  tenantId    String
+  memberClass MemberClass
+
+  discountPercent         Decimal @default(0) @db.Decimal(5, 2)
+  birthdayBenefitEnabled  Boolean @default(false)
+  birthdayDiscountPercent Decimal @default(0) @db.Decimal(5, 2)
+  birthdayGiftNote        String?
+  allowSpecialCreditLimit Boolean @default(false)
+  creditLimitAmount       Decimal @default(0) @db.Decimal(10, 2)
+  notes                   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, memberClass])
+  @@index([tenantId])
+  @@map("member_class_benefits")
+}
+
+model MemberNote {
+  id       String @id @default(uuid())
+  tenantId String
+  memberId String
+
+  note       String
+  visibility MemberNoteVisibility @default(MANAGER_AND_OWNER)
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([memberId])
+  @@map("member_notes")
+}
+
+model MemberIncident {
+  id       String @id @default(uuid())
+  tenantId String
+  memberId String
+
+  type        IncidentType
+  severity    IncidentSeverity @default(LOW)
+  description String
+  status      IncidentStatus   @default(OPEN)
+
+  createdBy  String?
+  resolvedBy String?
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([status])
+  @@index([severity])
+  @@map("member_incidents")
+}
+
+// ======================================================
+// PRODUCTOS Y STOCK
+// ======================================================
+
+model ProductCategory {
+  id       String @id @default(uuid())
+  tenantId String
+
+  name        String
+  description String?
+  status      ProductStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("product_categories")
+}
+
+model Product {
+  id         String  @id @default(uuid())
+  tenantId   String
+  categoryId String?
+
+  name        String
+  description String?
+  sku         String?
+  barcode     String?
+
+  unitType UnitType @default(UNIT)
+
+  price Decimal  @db.Decimal(10, 2)
+  cost  Decimal? @db.Decimal(10, 2)
+
+  imageUrl String?
+  status   ProductStatus @default(ACTIVE)
+
+  minimumStock         Decimal? @db.Decimal(10, 3)
+  idealStock           Decimal? @db.Decimal(10, 3)
+  allowDecimalQuantity Boolean  @default(true)
+  trackStock           Boolean  @default(true)
+
+  createdById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category  ProductCategory? @relation(fields: [categoryId], references: [id])
+  createdBy User?            @relation("ProductCreatedBy", fields: [createdById], references: [id])
+
+  inventory Inventory?
+  movements InventoryMovement[]
+  saleItems SaleItem[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([tenantId, status])
+  @@map("products")
+}
+
+model Inventory {
+  id        String @id @default(uuid())
+  tenantId  String
+  productId String @unique
+
+  currentQuantity  Decimal   @default(0) @db.Decimal(12, 3)
+  minimumQuantity  Decimal   @default(0) @db.Decimal(12, 3)
+  maximumQuantity  Decimal?  @db.Decimal(12, 3)
+  reservedQuantity Decimal   @default(0) @db.Decimal(12, 3)
+  lostQuantity     Decimal   @default(0) @db.Decimal(12, 3)
+  totalStockIn     Decimal   @default(0) @db.Decimal(12, 3)
+  totalStockOut    Decimal   @default(0) @db.Decimal(12, 3)
+  lastMovementAt   DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("inventory")
+}
+
+model InventoryMovement {
+  id        String @id @default(uuid())
+  tenantId  String
+  productId String
+
+  type             InventoryMovementType
+  quantity         Decimal               @db.Decimal(12, 6)
+  previousQuantity Decimal               @db.Decimal(12, 6)
+  newQuantity      Decimal               @db.Decimal(12, 6)
+
+  reason        String?
+  notes         String?
+  source        String?
+  batchCode     String?
+  unitCost      Decimal? @db.Decimal(10, 2)
+  totalCost     Decimal? @db.Decimal(10, 2)
+  referenceType String?
+  referenceId   String?
+
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("InventoryMovementCreatedBy", fields: [createdById], references: [id])
+
+  @@index([tenantId])
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("inventory_movements")
+}
+
+// ======================================================
+// TPV Y CAJA
+// ======================================================
+
+model PosSession {
+  id       String @id @default(uuid())
+  tenantId String
+
+  openedById String
+  closedById String?
+
+  openingCash       Decimal  @default(0) @db.Decimal(10, 2)
+  closingCash       Decimal? @db.Decimal(10, 2)
+  expectedCash      Decimal? @db.Decimal(10, 2)
+  difference        Decimal? @db.Decimal(10, 2)
+  closingSignature  String?  @db.Text
+  discrepancyReason String?
+
+  status PosSessionStatus @default(OPEN)
+
+  openedAt DateTime  @default(now())
+  closedAt DateTime?
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  openedBy User   @relation("PosSessionOpenedBy", fields: [openedById], references: [id])
+  closedBy User?  @relation("PosSessionClosedBy", fields: [closedById], references: [id])
+
+  sales              Sale[]
+  cashMovements      CashMovement[]
+  receivablePayments ReceivablePayment[]
+  thirdPartyPayments ThirdPartyPayment[]
+
+  @@index([tenantId])
+  @@index([openedById])
+  @@index([status])
+  @@index([openedAt])
+  @@index([tenantId, openedById, status, openedAt(sort: Desc)])
+  @@index([tenantId, openedAt(sort: Desc)])
+  @@map("pos_sessions")
+}
+
+model Sale {
+  id       String @id @default(uuid())
+  tenantId String
+
+  memberId     String
+  posSessionId String
+  soldById     String
+
+  subtotal Decimal @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  amountPaid       Decimal          @default(0) @db.Decimal(10, 2)
+  amountPending    Decimal          @default(0) @db.Decimal(10, 2)
+  settlementStatus SettlementStatus @default(PAID)
+  saleType         SaleType         @default(STANDARD)
+  creditReason     String?
+  approvedById     String?
+  specialReason    String?
+
+  status SaleStatus @default(COMPLETED)
+
+  createdAt DateTime @default(now())
+
+  cancelledAt   DateTime?
+  cancelledById String?
+  cancelReason  String?
+
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  member      Member     @relation(fields: [memberId], references: [id])
+  posSession  PosSession @relation(fields: [posSessionId], references: [id])
+  soldBy      User       @relation("SaleSoldBy", fields: [soldById], references: [id])
+  cancelledBy User?      @relation("SaleCancelledBy", fields: [cancelledById], references: [id])
+  approvedBy  User?      @relation("SaleApprovedBy", fields: [approvedById], references: [id])
+
+  items         SaleItem[]
+  payments      Payment[]
+  receivable    Receivable?
+  cashMovements CashMovement[]
+
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([posSessionId])
+  @@index([soldById])
+  @@index([approvedById])
+  @@index([status])
+  @@index([settlementStatus])
+  @@index([saleType])
+  @@index([createdAt])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@index([tenantId, memberId, status, createdAt(sort: Desc)])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String @id @default(uuid())
+  tenantId  String
+  saleId    String
+  productId String
+
+  productNameSnapshot    String
+  quantity               Decimal             @db.Decimal(12, 6)
+  unitPrice              Decimal             @db.Decimal(10, 2)
+  total                  Decimal             @db.Decimal(10, 2)
+  pricingMode            SaleItemPricingMode @default(BY_UNIT)
+  requestedAmount        Decimal?            @db.Decimal(10, 2)
+  actualWeight           Decimal?            @db.Decimal(12, 6)
+  weightDifference       Decimal?            @db.Decimal(12, 6)
+  wasteQuantity          Decimal?            @db.Decimal(12, 6)
+  scaleVerified          Boolean             @default(false)
+  scaleVerifiedAt        DateTime?
+  scaleVerifiedById      String?
+  scaleToleranceExceeded Boolean             @default(false)
+  scaleOverrideReason    String?
+  scaleOverrideById      String?
+
+  createdAt DateTime @default(now())
+
+  sale            Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product         Product @relation(fields: [productId], references: [id])
+  scaleVerifiedBy User?   @relation("SaleItemScaleVerifiedBy", fields: [scaleVerifiedById], references: [id])
+  scaleOverrideBy User?   @relation("SaleItemScaleOverrideBy", fields: [scaleOverrideById], references: [id])
+
+  @@index([tenantId])
+  @@index([saleId])
+  @@index([productId])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("sale_items")
+}
+
+model Payment {
+  id       String @id @default(uuid())
+  tenantId String
+  saleId   String
+
+  method PaymentMethod
+  amount Decimal       @db.Decimal(10, 2)
+  status PaymentStatus @default(COMPLETED)
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([saleId])
+  @@index([method])
+  @@index([status])
+  @@map("payments")
+}
+
+model CashMovement {
+  id           String  @id @default(uuid())
+  tenantId     String
+  posSessionId String
+  saleId       String?
+
+  type   CashMovementType
+  amount Decimal          @db.Decimal(10, 2)
+  reason String?
+
+  createdById String
+  createdAt   DateTime @default(now())
+
+  tenant            Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  posSession        PosSession         @relation(fields: [posSessionId], references: [id], onDelete: Cascade)
+  sale              Sale?              @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  createdBy         User               @relation("CashMovementCreatedBy", fields: [createdById], references: [id])
+  thirdPartyPayment ThirdPartyPayment?
+
+  @@index([tenantId])
+  @@index([posSessionId])
+  @@index([saleId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("cash_movements")
+}
+
+model ThirdParty {
+  id       String @id @default(uuid())
+  tenantId String
+
+  name           String
+  type           ThirdPartyType   @default(OTHER)
+  documentNumber String?
+  phone          String?
+  email          String?
+  notes          String?
+  status         ThirdPartyStatus @default(ACTIVE)
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User?               @relation("ThirdPartyCreatedBy", fields: [createdById], references: [id])
+  payments  ThirdPartyPayment[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([type])
+  @@map("third_parties")
+}
+
+model ThirdPartyPayment {
+  id           String  @id @default(uuid())
+  tenantId     String
+  thirdPartyId String?
+  posSessionId String
+
+  amount   Decimal                   @db.Decimal(10, 2)
+  category ThirdPartyPaymentCategory @default(OTHER)
+  status   ThirdPartyPaymentStatus   @default(PAID)
+
+  reason String
+  notes  String?
+
+  paidById      String
+  cancelledById String?
+  cancelledAt   DateTime?
+  cancelReason  String?
+
+  cashMovementId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  thirdParty   ThirdParty?   @relation(fields: [thirdPartyId], references: [id])
+  posSession   PosSession    @relation(fields: [posSessionId], references: [id])
+  paidBy       User          @relation("ThirdPartyPaymentPaidBy", fields: [paidById], references: [id])
+  cancelledBy  User?         @relation("ThirdPartyPaymentCancelledBy", fields: [cancelledById], references: [id])
+  cashMovement CashMovement? @relation(fields: [cashMovementId], references: [id])
+
+  @@index([tenantId])
+  @@index([thirdPartyId])
+  @@index([posSessionId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("third_party_payments")
+}
+
+model Receivable {
+  id       String  @id @default(uuid())
+  tenantId String
+  memberId String
+  saleId   String? @unique
+
+  originalAmount    Decimal @db.Decimal(10, 2)
+  paidAmount        Decimal @default(0) @db.Decimal(10, 2)
+  outstandingAmount Decimal @db.Decimal(10, 2)
+
+  status  ReceivableStatus @default(OPEN)
+  dueDate DateTime?
+  reason  String?
+
+  createdById  String
+  approvedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sale       Sale?               @relation(fields: [saleId], references: [id])
+  member     Member              @relation(fields: [memberId], references: [id])
+  createdBy  User                @relation("ReceivableCreatedBy", fields: [createdById], references: [id])
+  approvedBy User?               @relation("ReceivableApprovedBy", fields: [approvedById], references: [id])
+  payments   ReceivablePayment[]
+
+  @@index([tenantId])
+  @@index([memberId])
+  @@index([saleId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("receivables")
+}
+
+model ReceivablePayment {
+  id           String  @id @default(uuid())
+  tenantId     String
+  receivableId String
+  memberId     String
+  posSessionId String?
+
+  amount Decimal @db.Decimal(10, 2)
+  notes  String?
+
+  receivedById String
+  createdAt    DateTime @default(now())
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  receivable Receivable  @relation(fields: [receivableId], references: [id], onDelete: Cascade)
+  member     Member      @relation(fields: [memberId], references: [id])
+  posSession PosSession? @relation(fields: [posSessionId], references: [id])
+  receivedBy User        @relation("ReceivablePaymentReceivedBy", fields: [receivedById], references: [id])
+
+  @@index([tenantId])
+  @@index([receivableId])
+  @@index([memberId])
+  @@index([posSessionId])
+  @@index([createdAt])
+  @@map("receivable_payments")
+}
+
+// ======================================================
+// SEGURIDAD Y ACCESOS
+// ======================================================
+
+model AccessLink {
+  id       String @id @default(uuid())
+  tenantId String
+
+  tokenHash String           @unique
+  status    AccessLinkStatus @default(ACTIVE)
+
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  revokedAt DateTime?
+  revokedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("access_links")
+}
+
+model EmergencyLock {
+  id       String @id @default(uuid())
+  tenantId String
+
+  status EmergencyLockStatus @default(ACTIVE)
+  reason String?
+
+  activatedById String
+  activatedAt   DateTime @default(now())
+
+  deactivatedById  String?
+  deactivatedAt    DateTime?
+  resolutionReason String?
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  activatedBy   User   @relation("EmergencyActivatedBy", fields: [activatedById], references: [id])
+  deactivatedBy User?  @relation("EmergencyDeactivatedBy", fields: [deactivatedById], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([activatedAt])
+  @@map("emergency_locks")
+}
+
+// ======================================================
+// AUDITORÍA
+// ======================================================
+
+model AuditLog {
+  id       String  @id @default(uuid())
+  tenantId String?
+
+  userId String?
+  action String
+
+  entityType String?
+  entityId   String?
+
+  oldValue Json?
+  newValue Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model PlatformAuditLog {
+  id          String  @id @default(uuid())
+  actorUserId String?
+  tenantId    String?
+
+  action     String
+  entityType String
+  entityId   String?
+
+  oldValue Json?
+  newValue Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  actorUser User?   @relation("PlatformAuditActor", fields: [actorUserId], references: [id])
+  tenant    Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([actorUserId])
+  @@index([tenantId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@map("platform_audit_logs")
+}
+
+model PlatformSupportSession {
+  id         String  @id @default(uuid())
+  tenantId   String
+  openedById String
+  closedById String?
+
+  reason String
+  status PlatformSupportSessionStatus @default(OPEN)
+  notes  String?
+
+  openedAt  DateTime  @default(now())
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  openedBy User   @relation("PlatformSupportOpenedBy", fields: [openedById], references: [id])
+  closedBy User?  @relation("PlatformSupportClosedBy", fields: [closedById], references: [id])
+
+  @@index([tenantId])
+  @@index([openedById])
+  @@index([status])
+  @@index([openedAt])
+  @@map("platform_support_sessions")
+}
+
+model PlatformInvoice {
+  id          String                @id @default(uuid())
+  tenantId    String
+  number      String                @unique
+  description String?
+  amount      Decimal               @db.Decimal(10, 2)
+  currency    String                @default("EUR")
+  status      PlatformInvoiceStatus @default(ISSUED)
+  issuedAt    DateTime              @default(now())
+  dueAt       DateTime?
+  paidAt      DateTime?
+  voidedAt    DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments PlatformPayment[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([issuedAt])
+  @@map("platform_invoices")
+}
+
+model PlatformPayment {
+  id        String                @id @default(uuid())
+  tenantId  String
+  invoiceId String?
+  amount    Decimal               @db.Decimal(10, 2)
+  currency  String                @default("EUR")
+  method    String?
+  reference String?
+  status    PlatformPaymentStatus @default(PAID)
+  paidAt    DateTime              @default(now())
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice PlatformInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@index([status])
+  @@index([paidAt])
+  @@map("platform_payments")
+}
+
+model InternalNotification {
+  id       String  @id @default(uuid())
+  tenantId String
+  userId   String?
+
+  type     NotificationType
+  priority NotificationPriority @default(INFO)
+  status   NotificationStatus   @default(UNREAD)
+
+  title      String
+  message    String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+
+  readAt     DateTime?
+  resolvedAt DateTime?
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation("NotificationUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([type])
+  @@index([priority])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("internal_notifications")
+}
+
+model UserSession {
+  id         String    @id @default(uuid())
+  userId     String
+  tenantId   String
+  tokenHash  String
+  deviceName String?
+  userAgent  String?
+  ipAddress  String?
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation("UserSessionUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, tenantId])
+  @@index([tokenHash])
+  @@map("user_sessions")
+}
+
+model UserNotificationPreference {
+  id               String           @id @default(uuid())
+  userId           String
+  tenantId         String
+  notificationType NotificationType
+  enabled          Boolean          @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation("UserNotifPrefs", fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation("TenantNotifPrefs", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tenantId, notificationType])
+  @@index([userId, tenantId])
+  @@map("user_notification_preferences")
+}
+
+// ======================================================
+// CONFIGURACION DE PLATAFORMA (SINGLETON)
+// ======================================================
+
+model PlatformSettings {
+  id String @id @default("singleton")
+
+  platformName     String  @default("QuickPanel360")
+  contactEmail     String  @default("")
+  supportEmail     String  @default("")
+  logoUrl          String  @default("")
+  defaultLocale    String  @default("es")
+  defaultTimezone  String  @default("Europe/Madrid")
+
+  notifyNewLead        Boolean @default(true)
+  notifyEmergency      Boolean @default(true)
+  notifyPaymentOverdue Boolean @default(true)
+  notifyTrialExpiring  Boolean @default(true)
+  notifyNewTenant      Boolean @default(true)
+  notifySuspension     Boolean @default(true)
+  emailNotifications   Boolean @default(false)
+
+  minPasswordLength      Int     @default(8)
+  sessionTimeoutMinutes  Int     @default(480)
+  maxLoginAttempts       Int     @default(5)
+  requireStrongPasswords Boolean @default(true)
+
+  invoicePrefix     String @default("INV")
+  defaultCurrency   String @default("CR")
+  platformLegalName String @default("")
+  platformTaxId     String @default("")
+  platformAddress   String @default("")
+  platformCity      String @default("")
+  platformCountry   String @default("ES")
+
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
+// ======================================================
+// PORTAL DEL SOCIO — FASE 1
+// ======================================================
+
+enum PointTransactionType {
+  EARNED
+  REDEEMED
+  ADJUSTED
+  EXPIRED
+}
+
+model MemberSession {
+  id        String  @id @default(uuid())
+  tenantId  String
+  memberId  String
+  tokenHash String  @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation("TenantMemberSessions", fields: [tenantId], references: [id], onDelete: Cascade)
+  member Member @relation("MemberSessions", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, memberId])
+  @@index([tokenHash])
+  @@map("member_sessions")
+}
+
+model MemberPointBalance {
+  id             String @id @default(uuid())
+  tenantId       String
+  memberId       String
+  points         Int    @default(0)
+  lifetimePoints Int    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant Tenant @relation("TenantMemberPoints", fields: [tenantId], references: [id], onDelete: Cascade)
+  member Member @relation("MemberPointBalance", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, memberId])
+  @@map("member_point_balances")
+}
+
+model MemberPointTransaction {
+  id         String               @id @default(uuid())
+  tenantId   String
+  memberId   String
+  type       PointTransactionType
+  points     Int
+  reason     String
+  sourceType String?
+  sourceId   String?
+  metadata   Json?
+  createdAt  DateTime             @default(now())
+
+  tenant Tenant @relation("TenantMemberPointTx", fields: [tenantId], references: [id], onDelete: Cascade)
+  member Member @relation("MemberPointTransactions", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, memberId, createdAt(sort: Desc)])
+  @@map("member_point_transactions")
+}
+
+model MemberAppSettings {
+  id                     String  @id @default(uuid())
+  tenantId               String  @unique
+  enabled                Boolean @default(false)
+  catalogEnabled         Boolean @default(true)
+  showProductValues      Boolean @default(false)
+  showApproxAvailability Boolean @default(false)
+  pointsEnabled          Boolean @default(true)
+  allowProfileEdit       Boolean @default(true)
+  digitalCardEnabled     Boolean @default(true)
+  gamesEnabled           Boolean @default(false)
+  missionsEnabled        Boolean @default(false)
+  rewardsEnabled         Boolean @default(false)
+  allowRewardRedemption  Boolean @default(true)
+  requireRewardApproval  Boolean @default(true)
+  maxDailyGamePlays      Int     @default(5)
+  maxDailyPointsFromGames Int    @default(50)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  tenant Tenant @relation("TenantMemberAppSettings", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("member_app_settings")
+}
+
+// ======================================================
+// PORTAL DEL SOCIO — FASE 2: JUEGOS, MISIONES, RECOMPENSAS
+// ======================================================
+
+enum RewardGameType {
+  DAILY_CHECKIN
+  QUIZ
+  SPIN
+  SURVEY
+  CUSTOM
+  BUBBLE_POP
+  MEMORY_CARDS
+  BLOCK_PUZZLE
+  RUNNER
+  REACTION_TAP
+}
+
+enum RewardGameSessionStatus {
+  STARTED
+  FINISHED
+  EXPIRED
+  CANCELLED
+}
+
+model RewardGameSession {
+  id            String                   @id @default(uuid())
+  tenantId      String
+  gameId        String
+  memberId      String
+  status        RewardGameSessionStatus  @default(STARTED)
+  seed          String?
+  startedAt     DateTime                 @default(now())
+  finishedAt    DateTime?
+  expiresAt     DateTime
+  score         Int?
+  pointsAwarded Int                      @default(0)
+  metadata      Json?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  tenant Tenant     @relation("TenantGameSessions", fields: [tenantId], references: [id], onDelete: Cascade)
+  game   RewardGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  member Member     @relation("MemberGameSessions", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, memberId, createdAt(sort: Desc)])
+  @@index([tenantId, gameId, createdAt(sort: Desc)])
+  @@index([tenantId, status])
+  @@map("reward_game_sessions")
+}
+
+enum RewardGameStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum MissionType {
+  COMPLETE_PROFILE
+  DAILY_ACCESS
+  QUIZ_PARTICIPATION
+  CHECK_IN
+  GAME_PLAY
+  CUSTOM
+}
+
+enum MissionStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum RewardStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum RewardRedemptionStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  DELIVERED
+  CANCELLED
+}
+
+model RewardGame {
+  id           String           @id @default(uuid())
+  tenantId     String
+  title        String
+  description  String?
+  type         RewardGameType
+  status       RewardGameStatus @default(ACTIVE)
+  pointsReward Int              @default(5)
+  cooldownHours Int             @default(24)
+  maxPlaysPerDay Int            @default(1)
+  config       Json?
+  startsAt     DateTime?
+  endsAt       DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  tenant   Tenant               @relation("TenantRewardGames", fields: [tenantId], references: [id], onDelete: Cascade)
+  plays    RewardGamePlay[]
+  sessions RewardGameSession[]
+
+  @@index([tenantId, status])
+  @@map("reward_games")
+}
+
+model RewardGamePlay {
+  id           String @id @default(uuid())
+  tenantId     String
+  gameId       String
+  memberId     String
+  result       String?
+  pointsEarned Int    @default(0)
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  tenant Tenant     @relation("TenantGamePlays", fields: [tenantId], references: [id], onDelete: Cascade)
+  game   RewardGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  member Member     @relation("MemberGamePlays", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, memberId, createdAt(sort: Desc)])
+  @@index([tenantId, gameId, memberId, createdAt(sort: Desc)])
+  @@map("reward_game_plays")
+}
+
+model Mission {
+  id           String        @id @default(uuid())
+  tenantId     String
+  title        String
+  description  String?
+  type         MissionType
+  status       MissionStatus @default(ACTIVE)
+  pointsReward Int           @default(25)
+  targetValue  Int           @default(1)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant   Tenant                  @relation("TenantMissions", fields: [tenantId], references: [id], onDelete: Cascade)
+  progress MemberMissionProgress[]
+
+  @@index([tenantId, status])
+  @@map("missions")
+}
+
+model MemberMissionProgress {
+  id            String    @id @default(uuid())
+  tenantId      String
+  missionId     String
+  memberId      String
+  progress      Int       @default(0)
+  completedAt   DateTime?
+  pointsAwarded Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenant  Tenant  @relation("TenantMissionProgress", fields: [tenantId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  member  Member  @relation("MemberMissionProgress", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, missionId, memberId])
+  @@index([tenantId, memberId])
+  @@map("member_mission_progress")
+}
+
+model Reward {
+  id               String       @id @default(uuid())
+  tenantId         String
+  title            String
+  description      String?
+  pointsCost       Int
+  status           RewardStatus @default(ACTIVE)
+  stockLimit       Int?
+  currentStock     Int?
+  requiresApproval Boolean      @default(true)
+  imageUrl         String?
+  terms            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  tenant      Tenant              @relation("TenantRewards", fields: [tenantId], references: [id], onDelete: Cascade)
+  redemptions RewardRedemption[]
+
+  @@index([tenantId, status])
+  @@map("rewards")
+}
+
+model RewardRedemption {
+  id           String                  @id @default(uuid())
+  tenantId     String
+  rewardId     String
+  memberId     String
+  pointsSpent  Int
+  status       RewardRedemptionStatus  @default(REQUESTED)
+  reviewedById String?
+  reviewedAt   DateTime?
+  deliveredAt  DateTime?
+  notes        String?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  tenant   Tenant @relation("TenantRedemptions", fields: [tenantId], references: [id], onDelete: Cascade)
+  reward   Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  member   Member @relation("MemberRedemptions", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, memberId, createdAt(sort: Desc)])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("reward_redemptions")
+}
+
+
+model MemberPushSubscription {
+  id        String   @id @default(uuid())
+  tenantId  String
+  memberId  String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation("TenantMemberPush", fields: [tenantId], references: [id], onDelete: Cascade)
+  member Member @relation("MemberPushSubs", fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@map("member_push_subscriptions")
+}
+
+model AdminPushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  tenantId  String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user   User   @relation("AdminPushSubs", fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation("TenantAdminPush", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("admin_push_subscriptions")
+}

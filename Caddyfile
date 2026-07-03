@@ -1,0 +1,74 @@
+# ============================================================
+# QuickPanel360 — Caddyfile
+# QuickAgence
+#
+# Reemplaza "tudominio.com" con tu dominio real.
+# Caddy gestiona TLS/HTTPS automáticamente via Let's Encrypt.
+# ============================================================
+
+# Panel web (Next.js)
+app.tudominio.com {
+  encode gzip zstd
+
+  header {
+    X-Content-Type-Options nosniff
+    X-Frame-Options SAMEORIGIN
+    Referrer-Policy strict-origin-when-cross-origin
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    -Server
+  }
+
+  reverse_proxy web:3001 {
+    header_up Host {host}
+    header_up X-Real-IP {remote_host}
+    header_up X-Forwarded-For {remote_host}
+    header_up X-Forwarded-Proto {scheme}
+  }
+}
+
+# API (NestJS)
+api.tudominio.com {
+  encode gzip zstd
+
+  header {
+    X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy strict-origin-when-cross-origin
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    -Server
+  }
+
+  # WebSocket upgrade — necesario para Socket.io
+  @websocket {
+    header Connection *Upgrade*
+    header Upgrade websocket
+  }
+
+  handle @websocket {
+    reverse_proxy api:3000 {
+      header_up Host {host}
+      header_up X-Real-IP {remote_host}
+      header_up X-Forwarded-For {remote_host}
+      header_up X-Forwarded-Proto {scheme}
+      transport http {
+        # Timeouts largos para WebSocket
+        dial_timeout 10s
+        response_header_timeout 0
+        read_timeout 0
+        write_timeout 0
+      }
+    }
+  }
+
+  # Resto de peticiones HTTP normales
+  handle {
+    reverse_proxy api:3000 {
+      header_up Host {host}
+      header_up X-Real-IP {remote_host}
+      header_up X-Forwarded-For {remote_host}
+      header_up X-Forwarded-Proto {scheme}
+    }
+  }
+}

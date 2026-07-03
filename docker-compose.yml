@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: cannaclub_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cannaclub
+      POSTGRES_PASSWORD: cannaclub_password
+      POSTGRES_DB: cannaclub_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - cannaclub_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: cannaclub_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - cannaclub_redis_data:/data
+
+volumes:
+  cannaclub_postgres_data:
+  cannaclub_redis_data:
